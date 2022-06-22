@@ -87,7 +87,19 @@
    ```
    执行 `crictl config runtime-endpoint unix:///run/containerd/containerd.sock` 立即生效
 
-2. 对 **master** 节点配置。
+2. 配置 bash 补全
+   ```
+   apt install bash-completion
+   source /etc/bash_completion
+   vim /root/.bashrc
+
+   source <(kubectl completion bash)
+   source <(kubeadm completion bash)
+   source <(crictl completion bash)
+   ```
+   `source /root/.bashrc`
+
+3. 对 **master** 节点配置。
    ```
    kubeadm config print init-defaults > init.yaml
    vim init.yaml            # 修改
@@ -99,25 +111,29 @@
    ```
    初始化 `kubeadm init --config=init.yaml`
 
-3. 对 **master** 网络(Calico)安装
-   > Install Calico 
-   >> Kubernetes
-   >>> Self-managed on-premises
-   >>>> Install Calico for on-premises deployments  
-   >>>> 
-   >>>> * 选择 **Manifest**
-
-   配置 `calico`
-
+4. 对 **master** 网络(Calico)安装
    ```
-   vim calico.yaml
+   wget https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml
+   kubectl apply -f tigera-operator.yaml
+   wget https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
 
-   - name: CALICO_IPV4POOL_CIDR    # 打开注释并修改
-     value: "10.10.0.0/16"    
+   vim custom-resources.yaml
+
+   cidr: 10.10.0.0/16        # 修改地址
    ```
-   执行 `kubectl apply -f calico.yaml`
+   `kubectl apply -f custom-resources.yaml`
    
-4. 对 **node** 节点 加入
+5. 对 **node** 节点 加入
    ```
    kubeadm join 192.168.122.101:6443 --token abcdef.0123456789abcdef  --discovery-token-ca-cert-hash sha256:4f961e28d65d7105041dc096471a32420b035b51c27ca50046679bf73f4d501c --cri-socket=unix:///run/containerd/containerd.sock
    ```
+
+6. 自定义脚本
+   ```
+   vim /usr/local/bin/kubectl-whoami
+   
+   #!/bin/sh
+   kubectl config view --template='{{ range .contexts }}{{ if eq .name "'$(kubectl config current-context)'" }}Current user: {{ printf "%s\n" .context.user }}{{ end }}{{ end }}'
+
+   ```
+   `chmod +x /usr/local/bin/kubectl-whoami`
