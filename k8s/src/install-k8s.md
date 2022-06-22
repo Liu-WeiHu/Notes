@@ -137,3 +137,11 @@
 
    ```
    `chmod +x /usr/local/bin/kubectl-whoami`
+
+# 常规命令操作
+```
+kubectl get secret -n kube-system  # 查看token
+kubectl get secret -n kube-system  bootstrap-token-abcdef -oyaml    # 查看token的yaml文件
+kubectl delete secret -n kube-system  bootstrap-token-abcdef  # 删除token
+kubectl token create --print-join-command  #重新生成 加入token
+```
