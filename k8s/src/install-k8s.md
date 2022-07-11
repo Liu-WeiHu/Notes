@@ -71,7 +71,10 @@
 
 # 安装容器
 
-跳过。按官方说明安装
+```
+apt update
+apt install docker.io
+```
 
 # 安装集群
 
@@ -103,10 +106,10 @@
    ```
    kubeadm init \
    --apiserver-advertise-address=192.168.122.101 \
-   --control-plane-endpoint=cluster-endpoint \
-   --kubernetes-version=1.24.2 \
+   --control-plane-endpoint=192.168.122.101 \
+   --kubernetes-version=1.23.8 \
    --service-cidr=10.96.0.0/16 \
-   --pod-network-cidr=192.168.0.0/16
+   --pod-network-cidr=192.168.0.0/16 
    ```
 
 4. 对 **master** 网络(Calico)安装
@@ -120,6 +123,7 @@
    ```
    kubeadm join 192.168.122.101:6443 --token abcdef.0123456789abcdef  --discovery-token-ca-cert-hash sha256:4f961e28d65d7105041dc096471a32420b035b51c27ca50046679bf73f4d501c --cri-socket=unix:///run/containerd/containerd.sock
    ```
+   docker的话就 `--cri-socket=unix:///var/run/cri-dockerd.sock`
 
 6. 自定义脚本
    ```
