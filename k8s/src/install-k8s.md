@@ -141,6 +141,11 @@ kubectl get secret -n kube-system  # 查看token
 kubectl get secret -n kube-system  bootstrap-token-abcdef -oyaml    # 查看token的yaml文件
 kubectl delete secret -n kube-system  bootstrap-token-abcdef  # 删除token
 kubectl token create --print-join-command  #重新生成 加入token 
+
+
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --port=80 --type=NodePort
+kubectl get deploy,svc,pod 
 ```
 
 # 部署dashboard
@@ -154,32 +159,12 @@ kubectl get svc -A | grep kubernetes-dashboard  #查看端口号
 ```
 要是打开 https://192.168.122.101:30301 打不开。 点击空白处 输入 thsiisunsafe
 
-创建访问帐号  vim dash.yaml
+创建访问帐号 
 ```
-cat << EOF | tee dashboard-adminuser.yaml 
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: admin-user
-  namespace: kubernetes-dashboard
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: admin-user
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: admin-user
-  namespace: kubernetes-dashboard
-
-EOF
+kubectl create serviceaccount dashboard-admin -n kube-system  # 创建用户
+kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin # 用户授权
+kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}') | awk '/token:/{print $2}'  # 获取用户token
 ```
-执行 `kubectl -n kubernetes-dashboard create token admin-user` 查看token
 
 # namespace
 `kubectl create/delete/get ns xxx`
