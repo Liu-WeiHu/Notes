@@ -78,17 +78,16 @@ apt install docker.io
 
 # 安装集群
 
-1. 配置 crictl  
+1. 全节点安装
    ```
-   vim /etc/crictl.yaml
-
-   runtime-endpoint: unix:///run/containerd/containerd.sock
-   image-endpoint: unix:///run/containerd/containerd.sock
-   timeout: 10
-   debug: false
-   pull-image-on-create: false
+   apt-get update
+   apt-get install -y apt-transport-https ca-certificates curl
+   curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+   echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+   apt-get update
+   apt-get install -y kubelet=1.23.9-00 kubeadm=1.23.9-00 kubectl=1.23.9-00
+   apt-mark hold kubelet kubeadm kubectl
    ```
-   执行 `crictl config runtime-endpoint unix:///run/containerd/containerd.sock` 立即生效
 
 2. 配置 bash 补全
    ```
@@ -98,16 +97,18 @@ apt install docker.io
 
    source <(kubectl completion bash)
    source <(kubeadm completion bash)
-   source <(crictl completion bash)
+
+   ------------------------------------------------
+   source /root/.bashrc
    ```
-   `source /root/.bashrc`
+
 
 3. 对 **master** 节点配置。
    ```
    kubeadm init \
    --apiserver-advertise-address=192.168.122.101 \
    --control-plane-endpoint=192.168.122.101 \
-   --kubernetes-version=1.23.8 \
+   --kubernetes-version=1.23.9 \
    --service-cidr=10.96.0.0/16 \
    --pod-network-cidr=192.168.0.0/16 
    ```
@@ -121,9 +122,8 @@ apt install docker.io
    
 5. 对 **node** 节点 加入
    ```
-   kubeadm join 192.168.122.101:6443 --token abcdef.0123456789abcdef  --discovery-token-ca-cert-hash sha256:4f961e28d65d7105041dc096471a32420b035b51c27ca50046679bf73f4d501c --cri-socket=unix:///run/containerd/containerd.sock
+   kubeadm join 192.168.122.101:6443 --token abcdef.0123456789abcdef  --discovery-token-ca-cert-hash sha256:4f961e28d65d7105041dc096471a32420b035b51c27ca50046679bf73f4d501c 
    ```
-   docker的话就 `--cri-socket=unix:///var/run/cri-dockerd.sock`
 
 6. 自定义脚本
    ```
