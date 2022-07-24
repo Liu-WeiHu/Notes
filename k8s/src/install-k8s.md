@@ -163,7 +163,7 @@ kubectl get svc -A | grep kubernetes-dashboard  #查看端口号
 ```
 kubectl create serviceaccount dashboard-admin -n kube-system  # 创建用户
 kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin # 用户授权
-kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}') | awk '/token:/{print $2}'  # 获取用户token
+kubectl describe secrets -n kube-system $(kubectl get secrets -n kube-system | awk '/dashboard/ {print $1}') | awk '/token:/ {print $2}'  # 获取用户token
 ```
 
 # namespace
