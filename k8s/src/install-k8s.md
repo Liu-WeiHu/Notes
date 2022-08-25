@@ -112,6 +112,50 @@ apt install docker.io
    --service-cidr=10.96.0.0/16 \
    --pod-network-cidr=192.168.0.0/16 
    ```
+   或者 用配置文件
+   ```
+    apiVersion: kubeadm.k8s.io/v1beta3
+    bootstrapTokens:
+    - groups:
+      - system:bootstrappers:kubeadm:default-node-token
+      token: abcdef.0123456789abcdef
+      ttl: 24h0m0s
+      usages:
+      - signing
+      - authentication
+    kind: InitConfiguration
+    localAPIEndpoint:
+      advertiseAddress: 192.168.122.101
+      bindPort: 6443
+    nodeRegistration:
+      criSocket: /var/run/dockershim.sock
+      imagePullPolicy: IfNotPresent
+      name: node
+      taints: null
+    ---
+    apiServer:
+      timeoutForControlPlane: 4m0s
+    apiVersion: kubeadm.k8s.io/v1beta3
+    certificatesDir: /etc/kubernetes/pki
+    clusterName: kubernetes
+    controllerManager: {}
+    dns: {}
+    etcd:
+      local:
+        dataDir: /var/lib/etcd
+    imageRepository: k8s.gcr.io
+    kind: ClusterConfiguration
+    kubernetesVersion: 1.23.9
+    controlPlaneEndpoint: 192.168.122.101
+    networking:
+      dnsDomain: cluster.local
+      serviceSubnet: 10.96.0.0/16
+    scheduler: {}
+    ---
+    apiVersion: kubeproxy.config.k8s.io/v1alpha1
+    kind: KubeProxyConfiguration
+    mode: ipvs
+   ```
 
 4. 对 **master** 网络(Calico)安装
    ```
